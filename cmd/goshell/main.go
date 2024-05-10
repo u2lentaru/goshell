@@ -11,6 +11,7 @@ import (
 
 	"goshell/internal/config"
 	"goshell/internal/pgclient"
+	"goshell/internal/routes"
 
 	"github.com/gorilla/mux"
 )
@@ -29,7 +30,7 @@ func main() {
 
 	route := mux.NewRouter()
 
-	// routes.AddRoutes(route)
+	routes.AddRoutes(route)
 
 	//GS start
 	srv := &http.Server{
