@@ -1,4 +1,4 @@
-FROM golang:1.15 as builder
+FROM golang:1.22 as builder
 
 RUN mkdir /app
 ENV GO111MODULE=on
