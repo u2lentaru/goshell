@@ -1,3 +1,4 @@
 env: "local" # Окружение - local, dev или prod
-pg_url: "postgres://postgres:postgres@localhost:5432/postgres" # файл, в котором будет храниться наша БД
+pg_url: "postgres://postgres:postgres@localhost:5432/postgres"
+app_port: ":8080"
 db_host: "localhost"

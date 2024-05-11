@@ -7,5 +7,6 @@ import (
 )
 
 func AddRoutes(r *mux.Router) {
-	r.HandleFunc("/form_types", handlers.HandleFormTypes).Methods("GET", "OPTIONS")
+	r.HandleFunc("/", handlers.HandleRoot).Methods("GET", "OPTIONS")
+	// r.HandleFunc("/form_types", handlers.HandleFormTypes).Methods("GET", "OPTIONS")
 }

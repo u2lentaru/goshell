@@ -8,8 +8,10 @@ import (
 )
 
 type Config struct {
-	Env   string `yaml:"env" env-default:"development"`
-	PgURL string `yaml:"pg_url" env-required:"true"`
+	Env     string `yaml:"env" env-default:"development"`
+	PgURL   string `yaml:"pg_url" env-required:"true"`
+	AppPort string `yaml:"app_port" env-default:":8080"`
+	DbHost  string `yaml:"db_host" env-default:"localhost"`
 	// HTTPServer  `yaml:"http_server"`
 }
 
@@ -25,7 +27,7 @@ func MustLoad() *Config {
 	// Получаем путь до конфиг-файла из env-переменной CONFIG_PATH
 	//$ENV:CONFIG_PATH="E:\workgo\goshell\config\local.yaml"
 	configPath := os.Getenv("CONFIG_PATH")
-	// configPath := "../../config/local/yaml"
+	// configPath := "../../config/local.yaml"
 
 	if configPath == "" {
 		log.Fatal("CONFIG_PATH environment variable is not set")
