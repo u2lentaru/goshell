@@ -51,7 +51,7 @@ func GetDb(ctx context.Context, url string) (*pgxpool.Pool, error) {
 	ct_sql := `CREATE TABLE IF NOT EXISTS public.commands (
 		id int NOT NULL GENERATED ALWAYS AS IDENTITY,
 		command_text text NOT NULL,
-		response_text text NOT NULL,
+		result_text text NOT NULL,
 		CONSTRAINT command_pk PRIMARY KEY (id)
 	);`
 

@@ -19,9 +19,9 @@ import (
 func main() {
 	cfg := config.MustLoad()
 
-	// url := cfg.PgURL
+	// TODO: logs
+
 	url := "postgres://postgres:postgres@" + os.Getenv("DB_HOST") + ":5432/postgres"
-	// url := "postgres://postgres:postgres@" + cfg.DbHost + ":5432/postgres"
 
 	dbpool, err := pgclient.GetDb(context.Background(), url)
 	defer dbpool.Close()
@@ -36,8 +36,7 @@ func main() {
 
 	//GS start
 	srv := &http.Server{
-		Addr: cfg.AppPort,
-		// Addr:    ":8080",
+		Addr:    cfg.AppPort,
 		Handler: route,
 	}
 

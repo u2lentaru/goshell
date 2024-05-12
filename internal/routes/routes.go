@@ -11,5 +11,4 @@ func AddRoutes(r *mux.Router) {
 	r.HandleFunc("/command", handlers.HandleExec).Methods("GET", "OPTIONS")
 	r.HandleFunc("/commands", handlers.HandleList).Methods("GET", "OPTIONS")
 	r.HandleFunc("/commands/{id:[0-9]+}", handlers.HandleGetOne).Methods("GET", "OPTIONS")
-	// r.HandleFunc("/form_types", handlers.HandleFormTypes).Methods("GET", "OPTIONS")
 }
