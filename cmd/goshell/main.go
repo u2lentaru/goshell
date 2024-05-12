@@ -9,7 +9,6 @@ import (
 	"syscall"
 	"time"
 
-	"goshell/internal/config"
 	"goshell/internal/pgclient"
 	"goshell/internal/routes"
 
@@ -17,7 +16,7 @@ import (
 )
 
 func main() {
-	cfg := config.MustLoad()
+	// cfg := config.MustLoad()
 
 	// TODO: logs
 
@@ -36,7 +35,7 @@ func main() {
 
 	//GS start
 	srv := &http.Server{
-		Addr:    cfg.AppPort,
+		Addr:    ":8080",
 		Handler: route,
 	}
 
