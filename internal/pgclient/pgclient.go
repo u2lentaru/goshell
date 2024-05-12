@@ -46,5 +46,20 @@ func GetDb(ctx context.Context, url string) (*pgxpool.Pool, error) {
 		log.Println("version:", v)
 	}
 
+	// TODO: migrations
+
+	ct_sql := `CREATE TABLE IF NOT EXISTS public.commands (
+		id int NOT NULL GENERATED ALWAYS AS IDENTITY,
+		command_text text NOT NULL,
+		response_text text NOT NULL,
+		CONSTRAINT command_pk PRIMARY KEY (id)
+	);`
+
+	_, err = WDB.Exec(ctx, ct_sql)
+	if err != nil {
+		log.Printf("Error %s when creating commands table", err)
+		return nil, err
+	}
+
 	return WDB, nil
 }
