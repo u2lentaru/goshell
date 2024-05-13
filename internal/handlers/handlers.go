@@ -23,6 +23,7 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+// func HandlePostExec(w http.ResponseWriter, r *http.Request) - загрузка скрипта и его выполнение
 func HandlePostExec(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	dbpool := pgclient.WDB
@@ -111,57 +112,69 @@ func HandlePostExec(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func HandleExec(w http.ResponseWriter, r *http.Request) {
+// func HandleExecOne(w http.ResponseWriter, r *http.Request) - выполнение скрипта по id
+func HandleExecOne(w http.ResponseWriter, r *http.Request) {
 	// db
 	ctx := context.Background()
+
+	vars := mux.Vars(r)
+	i, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		i = 0
+	}
+
 	dbpool := pgclient.WDB
+	g := structs.Command{}
+
+	err = dbpool.QueryRow(ctx, "SELECT * from public.commands where id=$1;", i).Scan(&g.Id, &g.CommandText, &g.ScriptText)
+
+	if err != nil {
+		log.Println(err.Error(), "exec_one")
+		http.Redirect(w, r, "/results", http.StatusSeeOther)
+	}
+
+	_ = os.MkdirAll("/test", 0777)
+
+	f, err := os.CreateTemp("/test", "*.sh")
+	if err != nil {
+		log.Println(err.Error())
+	}
+	defer f.Close()
+
+	if err := os.WriteFile(f.Name(), []byte(g.ScriptText), 0777); err != nil {
+		log.Println(err.Error())
+	}
 
 	stout := ""
-	sterr := ""
-	// cmd := "cat /proc/cpuinfo | egrep '^model name' | uniq | awk '{print substr($0, index($0,$4))}'"
-	cmd := "ls"
-	// out, err := exec.Command("bash", "-c", cmd).Output()
-	out, err := exec.Command(cmd).Output()
+	cmd := f.Name()
+
+	out, err := exec.Command("bash", cmd).Output()
+
 	if err != nil {
-		sterr = fmt.Sprintf("Failed to execute command: %s error %s", cmd, err.Error())
+		log.Println(err.Error())
 	}
 
 	stout = string(out)
 
-	// ai := 0
-	// err = dbpool.QueryRow(ctx, "insert into commands (id, command_text, result_text) values (default, $1, $2) returning id into i;", cmd, stout).Scan(&ai)
-	dbres, err := dbpool.Exec(ctx, "insert into commands (id, command_text, result_text) values (default, $1, $2);", cmd, stout)
+	rid := 0
+	t := time.Now()
+	err = dbpool.QueryRow(ctx, "insert into results (id, id_command, output, time) values (default, $1, $2, $3) returning id;", g.Id, stout, t.Format("2006-01-02 15:04:05")).Scan(&rid)
 
 	if err != nil {
-		// w.Write([]byte("Failed execute command add!"))
-		w.Write([]byte(" dberr: "))
-		w.Write([]byte(err.Error()))
-		w.Write([]byte(" stout: "))
-		w.Write([]byte(stout))
-		w.Write([]byte(" sterr: "))
-		w.Write([]byte(sterr))
+		w.Write([]byte("Failed execute command add!"))
 		return
 	}
 
-	w.Write([]byte(" dbres: "))
-	w.Write([]byte(dbres))
-	w.Write([]byte(" stout: "))
-	w.Write([]byte(stout))
-	w.Write([]byte(" sterr: "))
-	w.Write([]byte(sterr))
-
-	return
+	http.Redirect(w, r, "/results", http.StatusSeeOther)
 }
 
-func HandleExecOne(w http.ResponseWriter, r *http.Request) {
+// func HandleExec(w http.ResponseWriter, r *http.Request) - выполнение списка скриптов
+func HandleExec(w http.ResponseWriter, r *http.Request) {
 	// db
-	// ctx := context.Background()
-	// dbpool := pgclient.WDB
-
 	return
 }
 
-// func HandleList(w http.ResponseWriter, r *http.Request)
+// func HandleList(w http.ResponseWriter, r *http.Request) - вывод списка команд
 func HandleList(w http.ResponseWriter, r *http.Request) {
 	// db
 	ctx := context.Background()
@@ -210,7 +223,7 @@ func HandleList(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// func HandleGetOne(w http.ResponseWriter, r *http.Request)
+// func HandleGetOne(w http.ResponseWriter, r *http.Request) - вывод команды по id
 func HandleGetOne(w http.ResponseWriter, r *http.Request) {
 	// db
 	ctx := context.Background()
@@ -256,7 +269,7 @@ func HandleGetOne(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// func HandleResults(w http.ResponseWriter, r *http.Request)
+// func HandleResults(w http.ResponseWriter, r *http.Request) - вывод списка результатов
 func HandleResults(w http.ResponseWriter, r *http.Request) {
 	// db
 	ctx := context.Background()
