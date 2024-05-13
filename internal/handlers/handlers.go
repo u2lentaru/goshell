@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"time"
 
 	"goshell/internal/pgclient"
 	"goshell/internal/structs"
@@ -63,7 +64,10 @@ func HandlePostExec(w http.ResponseWriter, r *http.Request) {
 
 	stout = string(out)
 
-	dbres, err := dbpool.Exec(ctx, "insert into commands (id, command_text, script_text) values (default, $1, $2);", cmd, string(body))
+	// dbres, err := dbpool.Exec(ctx, "insert into commands (id, command_text, script_text) values (default, $1, $2);", cmd, string(body))
+
+	cid := 0
+	err = dbpool.QueryRow(ctx, "insert into commands (id, command_text, script_text) values (default, $1, $2) returning id;", cmd, string(body)).Scan(&cid)
 
 	if err != nil {
 		// w.Write([]byte("Failed execute command add!"))
@@ -76,8 +80,21 @@ func HandlePostExec(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte(" dbres: "))
-	w.Write([]byte(dbres))
+	rid := 0
+	t := time.Now()
+	err = dbpool.QueryRow(ctx, "insert into results (id, id_command, output, time) values (default, $1, $2, $3) returning id;", cid, stout, t.Format("2006-01-02 15:04:05")).Scan(&rid)
+
+	if err != nil {
+		// w.Write([]byte("Failed execute command add!"))
+		w.Write([]byte(" dberr: "))
+		w.Write([]byte(err.Error()))
+		w.Write([]byte(" stout: "))
+		w.Write([]byte(stout))
+		w.Write([]byte(" sterr: "))
+		w.Write([]byte(sterr))
+		return
+	}
+
 	w.Write([]byte(" stout: "))
 	w.Write([]byte(stout))
 	w.Write([]byte(" sterr: "))
