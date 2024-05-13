@@ -74,8 +74,6 @@ func HandlePostExec(w http.ResponseWriter, r *http.Request) {
 
 	stout = string(out)
 
-	// dbres, err := dbpool.Exec(ctx, "insert into commands (id, command_text, script_text) values (default, $1, $2);", cmd, string(body))
-
 	cid := 0
 	err = dbpool.QueryRow(ctx, "insert into commands (id, command_text, script_text) values (default, $1, $2) returning id;", cmd, string(body)).Scan(&cid)
 
