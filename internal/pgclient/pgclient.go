@@ -51,13 +51,27 @@ func GetDb(ctx context.Context, url string) (*pgxpool.Pool, error) {
 	ct_sql := `CREATE TABLE IF NOT EXISTS public.commands (
 		id int NOT NULL GENERATED ALWAYS AS IDENTITY,
 		command_text text NOT NULL,
-		result_text text NOT NULL,
+		script_text text NOT NULL,
 		CONSTRAINT command_pk PRIMARY KEY (id)
 	);`
 
 	_, err = WDB.Exec(ctx, ct_sql)
 	if err != nil {
 		log.Printf("Error %s when creating commands table", err)
+		return nil, err
+	}
+
+	ct_sql = `CREATE TABLE IF NOT EXISTS public.results (
+		id int NOT NULL GENERATED ALWAYS AS IDENTITY,
+		"id_command" int NOT NULL,
+		"output" varchar,
+		"time" timestamp NOT NULL,
+		FOREIGN KEY (id_command)  REFERENCES commands (id)
+	);`
+
+	_, err = WDB.Exec(ctx, ct_sql)
+	if err != nil {
+		log.Printf("Error %s when creating results table", err)
 		return nil, err
 	}
 

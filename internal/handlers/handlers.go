@@ -63,7 +63,7 @@ func HandlePostExec(w http.ResponseWriter, r *http.Request) {
 
 	stout = string(out)
 
-	dbres, err := dbpool.Exec(ctx, "insert into commands (id, command_text, result_text) values (default, $1, $2);", cmd, stout)
+	dbres, err := dbpool.Exec(ctx, "insert into commands (id, command_text, script_text) values (default, $1, $2);", cmd, string(body))
 
 	if err != nil {
 		// w.Write([]byte("Failed execute command add!"))
@@ -86,7 +86,7 @@ func HandlePostExec(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func HandleGetExec(w http.ResponseWriter, r *http.Request) {
+func HandleExec(w http.ResponseWriter, r *http.Request) {
 	// db
 	ctx := context.Background()
 	dbpool := pgclient.WDB
@@ -128,6 +128,14 @@ func HandleGetExec(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+func HandleExecOne(w http.ResponseWriter, r *http.Request) {
+	// db
+	// ctx := context.Background()
+	// dbpool := pgclient.WDB
+
+	return
+}
+
 // func HandleList(w http.ResponseWriter, r *http.Request)
 func HandleList(w http.ResponseWriter, r *http.Request) {
 	// db
@@ -155,7 +163,7 @@ func HandleList(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	for rows.Next() {
-		err = rows.Scan(&gs.Id, &gs.CommandText, &gs.ResultText)
+		err = rows.Scan(&gs.Id, &gs.CommandText, &gs.ScriptText)
 		if err != nil {
 			log.Println("failed to scan row:", err)
 		}
@@ -192,7 +200,7 @@ func HandleGetOne(w http.ResponseWriter, r *http.Request) {
 	out_arr := []structs.Command{}
 	g := structs.Command{}
 
-	err = dbpool.QueryRow(ctx, "SELECT * from public.commands where id=$1;", i).Scan(&g.Id, &g.CommandText, &g.ResultText)
+	err = dbpool.QueryRow(ctx, "SELECT * from public.commands where id=$1;", i).Scan(&g.Id, &g.CommandText, &g.ScriptText)
 
 	if err != nil {
 		log.Println(err.Error(), "commands_one")
@@ -218,6 +226,55 @@ func HandleGetOne(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 500)
 		return
 	}
+	w.Write(out_count)
+
+	return
+}
+
+// func HandleResults(w http.ResponseWriter, r *http.Request)
+func HandleResults(w http.ResponseWriter, r *http.Request) {
+	// db
+	ctx := context.Background()
+
+	dbpool := pgclient.WDB
+	gs := structs.Result{}
+
+	gsc := 0
+	err := dbpool.QueryRow(ctx, "SELECT count(*) from public.results;").Scan(&gsc)
+
+	if err != nil {
+		log.Println(err.Error(), "results_count")
+		return
+	}
+
+	out_arr := make([]structs.Result, 0, gsc)
+
+	rows, err := dbpool.Query(ctx, "SELECT id, id_command, output, time::text as ts from public.results;")
+	if err != nil {
+		log.Println(err.Error(), "results_list")
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		err = rows.Scan(&gs.Id, &gs.IdC, &gs.Output, &gs.TS)
+		if err != nil {
+			log.Println("failed to scan row:", err)
+		}
+
+		out_arr = append(out_arr, gs)
+	}
+
+	out_arr_count := structs.Result_count{Values: out_arr, Count: gsc}
+
+	// handler
+	out_count, err := json.Marshal(out_arr_count)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
 	w.Write(out_count)
 
 	return
