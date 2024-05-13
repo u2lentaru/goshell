@@ -1,3 +1,11 @@
-# goshell
-$ENV:CONFIG_PATH="E:\workgo\goshell\config\local.yaml"
- $ENV:DB_HOST="localhost"
+# goshell  
+git clone https://github.com/u2lentaru/goshell.git  
+docker-compose up  
+
+	r.HandleFunc("/", handlers.HandleList).Methods("GET")  
+	r.HandleFunc("/commands", handlers.HandleList).Methods("GET")  
+	r.HandleFunc("/commands/{id:[0-9]+}", handlers.HandleGetOne).Methods("GET")  
+	r.HandleFunc("/commands", handlers.HandlePostExec).Methods("POST")  
+	r.HandleFunc("/cmdrun/{id:[0-9]+}", handlers.HandleExecOne).Methods("GET")  
+	r.HandleFunc("/cmdrun", handlers.HandleExec).Methods("GET")  
+	r.HandleFunc("/results", handlers.HandleResults).Methods("GET")  
