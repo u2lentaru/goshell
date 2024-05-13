@@ -44,17 +44,27 @@ func HandlePostExec(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(" ls /: "))
 	w.Write(lsout)
 
-	if err := os.WriteFile("/test/file.sh", body, 0777); err != nil {
+	f, err := os.CreateTemp("/test", "*.sh")
+	if err != nil {
+		log.Println(err.Error())
+	}
+	defer f.Close()
+
+	fn := f.Name()
+	w.Write([]byte(" f.Name "))
+	w.Write([]byte(fn))
+
+	if err := os.WriteFile(fn, body, 0777); err != nil {
 		log.Println(err.Error())
 	}
 
-	lsout, err = exec.Command("ls", "-l", "/test/file.sh").Output()
+	lsout, err = exec.Command("ls", "-l", fn).Output()
 	w.Write([]byte(" ls /test/file.sh: "))
 	w.Write(lsout)
 
 	stout := ""
 	sterr := ""
-	cmd := "/test/file.sh"
+	cmd := fn
 
 	out, err := exec.Command("bash", cmd).Output()
 
