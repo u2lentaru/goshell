@@ -17,6 +17,8 @@ import (
 
 func main() {
 	// cfg := config.MustLoad()
+	//$ENV:CONFIG_PATH="E:\workgo\goshell\config\local.yaml"
+	//$ENV:DB_HOST="localhost"
 
 	// TODO: logs
 

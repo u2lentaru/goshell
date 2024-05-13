@@ -86,7 +86,7 @@ func HandlePostExec(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func HandleExec(w http.ResponseWriter, r *http.Request) {
+func HandleGetExec(w http.ResponseWriter, r *http.Request) {
 	// db
 	ctx := context.Background()
 	dbpool := pgclient.WDB
