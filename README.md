@@ -2,10 +2,13 @@
 git clone https://github.com/u2lentaru/goshell.git  
 docker-compose up  
 
-	r.HandleFunc("/", handlers.HandleList).Methods("GET")  
-	r.HandleFunc("/commands", handlers.HandleList).Methods("GET")  
-	r.HandleFunc("/commands/{id:[0-9]+}", handlers.HandleGetOne).Methods("GET")  
-	r.HandleFunc("/commands", handlers.HandlePostExec).Methods("POST")  
-	r.HandleFunc("/cmdrun/{id:[0-9]+}", handlers.HandleExecOne).Methods("GET")  
-	r.HandleFunc("/cmdrun", handlers.HandleExec).Methods("GET")  
-	r.HandleFunc("/results", handlers.HandleResults).Methods("GET")  
+"/", handlers.HandleList).Methods("GET")  
+"/commands", handlers.HandleList).Methods("GET")  
+"/commands/{id:[0-9]+}", handlers.HandleGetOne).Methods("GET")  
+"/commands", handlers.HandlePostExec).Methods("POST")  
+"/cmdrun/{id:[0-9]+}", handlers.HandleExecOne).Methods("GET")  
+"/cmdrun", handlers.HandleExec).Methods("GET")  
+"/results", handlers.HandleResults).Methods("GET")  
+
+
+/cmdrun&ids=1,2,3 - выполняет команды 1.2,3
