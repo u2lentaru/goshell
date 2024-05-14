@@ -3,12 +3,11 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"strconv"
+	"strings"
 
 	"goshell/internal/services"
 
@@ -55,10 +54,20 @@ func HandleExecOne(w http.ResponseWriter, r *http.Request) {
 
 // func HandleExec(w http.ResponseWriter, r *http.Request) - выполнение списка скриптов
 func HandleExec(w http.ResponseWriter, r *http.Request) {
-	a := []int{1, 2, 3}
+	starr := r.URL.Query().Get("ids")
+	arr := strings.Split(starr, ",")
 
-	for _, i := range a {
-		go services.CommExec(i)
+	ids := []int{}
+
+	for _, s := range arr {
+		i, err := strconv.Atoi(s)
+		if err == nil {
+			ids = append(ids, i)
+		}
+	}
+
+	for _, id := range ids {
+		go services.CommExec(id)
 	}
 
 	http.Redirect(w, r, "/results", http.StatusSeeOther)
@@ -133,23 +142,34 @@ func HandleResults(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleTest(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	arr := r.URL.Query().Get("id")
+	// vars := mux.Vars(r)
+	starr := r.URL.Query().Get("ids")
+	w.Write([]byte(starr))
+	log.Println(starr)
+	arr := strings.Split(starr, ",")
 
-	var url, err = url.ParseQuery("a=1&a=2&b=3")
-	// var url, err = url.ParseQuery(r.URL.Query())
-
-	if err != nil {
-		log.Println("failed to parse:", err)
+	for _, s := range arr {
+		log.Println(s)
 	}
 
-	fmt.Println(url["a"])
+	// var url, err = url.ParseQuery("a=1&a=2&b=3")
+	// var url, err = url.ParseQuery(r.URL.Query())
 
-	w.Write([]byte(" vars[id] "))
-	w.Write([]byte(vars["id"]))
+	// if err != nil {
+	// 	log.Println("failed to parse:", err)
+	// }
 
-	w.Write([]byte(" arr: "))
-	w.Write([]byte(arr))
+	// w.Write([]byte(" r.URL.Query() "))
+	// w.Write([]byte(r.URL.Query().))
+	// arr := url["a"]
+	// w.Write([]byte(arr[1]))
+	// fmt.Println(url["a"])
+
+	// w.Write([]byte(" vars[id] "))
+	// w.Write([]byte(vars["id"]))
+
+	// w.Write([]byte(" arr: "))
+	// w.Write([]byte(arr))
 
 	// url.Get("id")
 	return
