@@ -1,4 +1,4 @@
-package structs
+package entities
 
 //Command struct
 type Command struct {

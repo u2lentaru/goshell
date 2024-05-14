@@ -12,8 +12,8 @@ import (
 	"strconv"
 	"time"
 
+	"goshell/internal/entities"
 	"goshell/internal/pgclient"
-	"goshell/internal/structs"
 
 	"github.com/gorilla/mux"
 )
@@ -124,7 +124,7 @@ func HandleExecOne(w http.ResponseWriter, r *http.Request) {
 	}
 
 	dbpool := pgclient.WDB
-	g := structs.Command{}
+	g := entities.Command{}
 
 	err = dbpool.QueryRow(ctx, "SELECT * from public.commands where id=$1;", i).Scan(&g.Id, &g.CommandText, &g.ScriptText)
 
@@ -173,7 +173,7 @@ func HandleExec(w http.ResponseWriter, r *http.Request) {
 	// db
 	ctx := context.Background()
 	dbpool := pgclient.WDB
-	g := structs.Command{}
+	g := entities.Command{}
 
 	a := []int{1, 2, 3}
 	for _, i := range a {
@@ -225,7 +225,7 @@ func HandleList(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	dbpool := pgclient.WDB
-	gs := structs.Command{}
+	gs := entities.Command{}
 
 	gsc := 0
 	err := dbpool.QueryRow(ctx, "SELECT count(*) from public.commands;").Scan(&gsc)
@@ -235,7 +235,7 @@ func HandleList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	out_arr := make([]structs.Command, 0, gsc)
+	out_arr := make([]entities.Command, 0, gsc)
 
 	rows, err := dbpool.Query(ctx, "SELECT * from public.commands;")
 	if err != nil {
@@ -254,7 +254,7 @@ func HandleList(w http.ResponseWriter, r *http.Request) {
 		out_arr = append(out_arr, gs)
 	}
 
-	out_arr_count := structs.Command_count{Values: out_arr, Count: gsc}
+	out_arr_count := entities.Command_count{Values: out_arr, Count: gsc}
 
 	// handler
 	out_count, err := json.Marshal(out_arr_count)
@@ -280,14 +280,14 @@ func HandleGetOne(w http.ResponseWriter, r *http.Request) {
 	}
 
 	dbpool := pgclient.WDB
-	out_arr := []structs.Command{}
-	g := structs.Command{}
+	out_arr := []entities.Command{}
+	g := entities.Command{}
 
 	err = dbpool.QueryRow(ctx, "SELECT * from public.commands where id=$1;", i).Scan(&g.Id, &g.CommandText, &g.ScriptText)
 
 	if err != nil {
 		log.Println(err.Error(), "commands_one")
-		out_arr_count := structs.Command_count{Values: []structs.Command{}, Count: 0}
+		out_arr_count := entities.Command_count{Values: []entities.Command{}, Count: 0}
 
 		out_count, err := json.Marshal(out_arr_count)
 		if err != nil {
@@ -301,7 +301,7 @@ func HandleGetOne(w http.ResponseWriter, r *http.Request) {
 
 	out_arr = append(out_arr, g)
 
-	out_arr_count := structs.Command_count{Values: out_arr, Count: 1}
+	out_arr_count := entities.Command_count{Values: out_arr, Count: 1}
 
 	// handler
 	out_count, err := json.Marshal(out_arr_count)
@@ -320,7 +320,7 @@ func HandleResults(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	dbpool := pgclient.WDB
-	gs := structs.Result{}
+	gs := entities.Result{}
 
 	gsc := 0
 	err := dbpool.QueryRow(ctx, "SELECT count(*) from public.results;").Scan(&gsc)
@@ -330,7 +330,7 @@ func HandleResults(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	out_arr := make([]structs.Result, 0, gsc)
+	out_arr := make([]entities.Result, 0, gsc)
 
 	rows, err := dbpool.Query(ctx, "SELECT id, id_command, output, time::text as ts from public.results;")
 	if err != nil {
@@ -349,7 +349,7 @@ func HandleResults(w http.ResponseWriter, r *http.Request) {
 		out_arr = append(out_arr, gs)
 	}
 
-	out_arr_count := structs.Result_count{Values: out_arr, Count: gsc}
+	out_arr_count := entities.Result_count{Values: out_arr, Count: gsc}
 
 	// handler
 	out_count, err := json.Marshal(out_arr_count)
