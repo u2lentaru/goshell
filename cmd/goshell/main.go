@@ -34,7 +34,6 @@ func main() {
 
 	routes.AddRoutes(route)
 
-	//GS start
 	srv := &http.Server{
 		Addr:    ":8080",
 		Handler: route,
@@ -64,5 +63,7 @@ func main() {
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatalf("Server Shutdown Failed:%+v", err)
 	}
+
 	log.Print("Server Exited Properly")
+
 }

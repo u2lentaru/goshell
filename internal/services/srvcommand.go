@@ -85,7 +85,7 @@ func CommSave(bs []byte) (int, error) {
 	return cid, nil
 }
 
-// func CommGetList(ctx context.Context) (entities.Command_count, error)
+// func CommGetList(ctx context.Context) (entities.Command_count, error) - возвращает список команд
 func CommGetList(ctx context.Context) (entities.Command_count, error) {
 	dbpool := pgclient.WDB
 	gs := entities.Command{}
@@ -122,7 +122,7 @@ func CommGetList(ctx context.Context) (entities.Command_count, error) {
 	return out_arr_count, nil
 }
 
-// func CommGetOne(ctx context.Context, id int) (entities.Command_count, error)
+// func CommGetOne(ctx context.Context, id int) (entities.Command_count, error) - вывод команды по id
 func CommGetOne(ctx context.Context, id int) (entities.Command_count, error) {
 	dbpool := pgclient.WDB
 	out_arr := []entities.Command{}

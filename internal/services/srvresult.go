@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-// func ResultGetList(ctx context.Context) (entities.Result_count, error)
+// func ResultGetList(ctx context.Context) (entities.Result_count, error) - вывод списка результатов
 func ResultGetList(ctx context.Context) (entities.Result_count, error) {
 	dbpool := pgclient.WDB
 	gs := entities.Result{}
