@@ -362,3 +362,18 @@ func HandleResults(w http.ResponseWriter, r *http.Request) {
 
 	return
 }
+
+// func HandleResults(w http.ResponseWriter, r *http.Request) - вывод списка результатов
+func HandleTest(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	arr := r.URL.Query().Get("id")
+
+	w.Write([]byte(" vars[id] "))
+	w.Write([]byte(vars["id"]))
+
+	w.Write([]byte(" arr: "))
+	w.Write([]byte(arr))
+
+	// url.Get("id")
+	return
+}

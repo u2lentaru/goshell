@@ -14,4 +14,5 @@ func AddRoutes(r *mux.Router) {
 	r.HandleFunc("/cmdrun/{id:[0-9]+}", handlers.HandleExecOne).Methods("GET")
 	r.HandleFunc("/cmdrun", handlers.HandleExec).Methods("GET")
 	r.HandleFunc("/results", handlers.HandleResults).Methods("GET")
+	r.HandleFunc("/test", handlers.HandleTest).Methods("GET")
 }
