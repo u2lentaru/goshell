@@ -10,7 +10,7 @@ GET
 http://localhost:8080/ - список всех команд  
 http://localhost:8080/commands - список всех команд  
 http://localhost:8080/commands/{id} - выводит команду с id={id}  
-http://localhost:8080/cmdrun&ids=1,2,3 - выполняет команды с id=1,2,3  
+http://localhost:8080/cmdrun?ids=1,2,3 - выполняет команды с id=1,2,3  
 http://localhost:8080/cmdrun/{id} - выполняет команду с id={id}  
 http://localhost:8080/results - список всех результатов  
 http://localhost:8080/health-check - health-check  
