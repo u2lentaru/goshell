@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"strconv"
@@ -14,6 +15,7 @@ import (
 
 	"goshell/internal/entities"
 	"goshell/internal/pgclient"
+	"goshell/internal/services"
 
 	"github.com/gorilla/mux"
 )
@@ -114,105 +116,24 @@ func HandlePostExec(w http.ResponseWriter, r *http.Request) {
 
 // func HandleExecOne(w http.ResponseWriter, r *http.Request) - выполнение скрипта по id
 func HandleExecOne(w http.ResponseWriter, r *http.Request) {
-	// db
-	ctx := context.Background()
-
 	vars := mux.Vars(r)
+
 	i, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		i = 0
 	}
 
-	dbpool := pgclient.WDB
-	g := entities.Command{}
-
-	err = dbpool.QueryRow(ctx, "SELECT * from public.commands where id=$1;", i).Scan(&g.Id, &g.CommandText, &g.ScriptText)
-
-	if err != nil {
-		log.Println(err.Error(), "exec_one")
-		http.Redirect(w, r, "/results", http.StatusSeeOther)
-	}
-
-	_ = os.MkdirAll("/test", 0777)
-
-	f, err := os.CreateTemp("/test", "*.sh")
-	if err != nil {
-		log.Println(err.Error())
-	}
-	defer f.Close()
-
-	if err := os.WriteFile(f.Name(), []byte(g.ScriptText), 0777); err != nil {
-		log.Println(err.Error())
-	}
-
-	stout := ""
-	cmd := f.Name()
-
-	out, err := exec.Command("bash", cmd).Output()
-
-	if err != nil {
-		log.Println(err.Error())
-	}
-
-	stout = string(out)
-
-	rid := 0
-	t := time.Now()
-	err = dbpool.QueryRow(ctx, "insert into results (id, id_command, output, time) values (default, $1, $2, $3) returning id;", g.Id, stout, t.Format("2006-01-02 15:04:05")).Scan(&rid)
-
-	if err != nil {
-		w.Write([]byte("Failed execute command add!"))
-		return
-	}
+	services.CommExec(i)
 
 	http.Redirect(w, r, "/results", http.StatusSeeOther)
 }
 
 // func HandleExec(w http.ResponseWriter, r *http.Request) - выполнение списка скриптов
 func HandleExec(w http.ResponseWriter, r *http.Request) {
-	// db
-	ctx := context.Background()
-	dbpool := pgclient.WDB
-	g := entities.Command{}
-
 	a := []int{1, 2, 3}
 	for _, i := range a {
 
-		err := dbpool.QueryRow(ctx, "SELECT * from public.commands where id=$1;", i).Scan(&g.Id, &g.CommandText, &g.ScriptText)
-		if err != nil {
-			log.Println(err.Error(), "exec_one")
-			http.Redirect(w, r, "/results", http.StatusSeeOther)
-		}
-
-		_ = os.MkdirAll("/test", 0777)
-		f, err := os.CreateTemp("/test", "*.sh")
-		if err != nil {
-			log.Println(err.Error())
-		}
-		defer f.Close()
-
-		if err := os.WriteFile(f.Name(), []byte(g.ScriptText), 0777); err != nil {
-			log.Println(err.Error())
-		}
-
-		stout := ""
-		cmd := f.Name()
-
-		out, err := exec.Command("bash", cmd).Output()
-
-		if err != nil {
-			log.Println(err.Error())
-		}
-
-		stout = string(out)
-
-		rid := 0
-		t := time.Now()
-		err = dbpool.QueryRow(ctx, "insert into results (id, id_command, output, time) values (default, $1, $2, $3) returning id;", g.Id, stout, t.Format("2006-01-02 15:04:05")).Scan(&rid)
-
-		if err != nil {
-			w.Write([]byte("Failed execute command add!"))
-		}
+		services.CommExec(i)
 	}
 
 	http.Redirect(w, r, "/results", http.StatusSeeOther)
@@ -367,6 +288,15 @@ func HandleResults(w http.ResponseWriter, r *http.Request) {
 func HandleTest(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	arr := r.URL.Query().Get("id")
+
+	var url, err = url.ParseQuery("a=1&a=2&b=3")
+	// var url, err = url.ParseQuery(r.URL.Query())
+
+	if err != nil {
+		log.Println("failed to parse:", err)
+	}
+
+	fmt.Println(url["a"])
 
 	w.Write([]byte(" vars[id] "))
 	w.Write([]byte(vars["id"]))
