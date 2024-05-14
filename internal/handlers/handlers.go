@@ -89,7 +89,6 @@ func HandleList(w http.ResponseWriter, r *http.Request) {
 
 // func HandleGetOne(w http.ResponseWriter, r *http.Request) - вывод команды по id
 func HandleGetOne(w http.ResponseWriter, r *http.Request) {
-	// db
 	ctx := context.Background()
 
 	vars := mux.Vars(r)
@@ -98,31 +97,12 @@ func HandleGetOne(w http.ResponseWriter, r *http.Request) {
 		i = 0
 	}
 
-	dbpool := pgclient.WDB
-	out_arr := []entities.Command{}
-	g := entities.Command{}
-
-	err = dbpool.QueryRow(ctx, "SELECT * from public.commands where id=$1;", i).Scan(&g.Id, &g.CommandText, &g.ScriptText)
-
+	out_arr_count, err := services.CommGetOne(ctx, i)
 	if err != nil {
-		log.Println(err.Error(), "commands_one")
-		out_arr_count := entities.Command_count{Values: []entities.Command{}, Count: 0}
-
-		out_count, err := json.Marshal(out_arr_count)
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-			return
-		}
-		w.Write(out_count)
-
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
-	out_arr = append(out_arr, g)
-
-	out_arr_count := entities.Command_count{Values: out_arr, Count: 1}
-
-	// handler
 	out_count, err := json.Marshal(out_arr_count)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
@@ -182,7 +162,6 @@ func HandleResults(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// func HandleResults(w http.ResponseWriter, r *http.Request) - вывод списка результатов
 func HandleTest(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	arr := r.URL.Query().Get("id")

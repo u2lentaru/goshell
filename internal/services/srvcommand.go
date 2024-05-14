@@ -95,7 +95,7 @@ func CommGetList(ctx context.Context) (entities.Command_count, error) {
 
 	if err != nil {
 		log.Println(err.Error(), "commands_count")
-		return entities.Command_count{}, err
+		return entities.Command_count{Values: []entities.Command{}, Count: 0}, err
 	}
 
 	out_arr := make([]entities.Command, 0, gsc)
@@ -103,7 +103,7 @@ func CommGetList(ctx context.Context) (entities.Command_count, error) {
 	rows, err := dbpool.Query(ctx, "SELECT * from public.commands;")
 	if err != nil {
 		log.Println(err.Error(), "commands_list")
-		return entities.Command_count{}, err
+		return entities.Command_count{Values: []entities.Command{}, Count: 0}, err
 	}
 
 	defer rows.Close()
@@ -118,6 +118,26 @@ func CommGetList(ctx context.Context) (entities.Command_count, error) {
 	}
 
 	out_arr_count := entities.Command_count{Values: out_arr, Count: gsc}
+
+	return out_arr_count, nil
+}
+
+// func CommGetOne(ctx context.Context, id int) (entities.Command_count, error)
+func CommGetOne(ctx context.Context, id int) (entities.Command_count, error) {
+	dbpool := pgclient.WDB
+	out_arr := []entities.Command{}
+	g := entities.Command{}
+
+	err := dbpool.QueryRow(ctx, "SELECT * from public.commands where id=$1;", id).Scan(&g.Id, &g.CommandText, &g.ScriptText)
+
+	if err != nil {
+		log.Println(err.Error(), "commands_one")
+		return entities.Command_count{Values: []entities.Command{}, Count: 0}, err
+	}
+
+	out_arr = append(out_arr, g)
+
+	out_arr_count := entities.Command_count{Values: out_arr, Count: 1}
 
 	return out_arr_count, nil
 }
