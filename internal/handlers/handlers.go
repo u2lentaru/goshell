@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -14,8 +15,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// func HandlePostExec(w http.ResponseWriter, r *http.Request) - загрузка скрипта и его выполнение
-func HandlePostExec(w http.ResponseWriter, r *http.Request) {
+// func HandlerPostExec(w http.ResponseWriter, r *http.Request) - загрузка скрипта и его выполнение
+func HandlerPostExec(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 
@@ -38,8 +39,8 @@ func HandlePostExec(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/results", http.StatusSeeOther)
 }
 
-// func HandleExecOne(w http.ResponseWriter, r *http.Request) - выполнение скрипта по id
-func HandleExecOne(w http.ResponseWriter, r *http.Request) {
+// func HandlerExecOne(w http.ResponseWriter, r *http.Request) - выполнение скрипта по id
+func HandlerExecOne(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	i, err := strconv.Atoi(vars["id"])
@@ -52,8 +53,8 @@ func HandleExecOne(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/results", http.StatusSeeOther)
 }
 
-// func HandleExec(w http.ResponseWriter, r *http.Request) - выполнение списка скриптов
-func HandleExec(w http.ResponseWriter, r *http.Request) {
+// func HandlerExec(w http.ResponseWriter, r *http.Request) - выполнение списка скриптов
+func HandlerExec(w http.ResponseWriter, r *http.Request) {
 	starr := r.URL.Query().Get("ids")
 	arr := strings.Split(starr, ",")
 
@@ -73,8 +74,8 @@ func HandleExec(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/results", http.StatusSeeOther)
 }
 
-// func HandleList(w http.ResponseWriter, r *http.Request) - вывод списка команд
-func HandleList(w http.ResponseWriter, r *http.Request) {
+// func HandlerList(w http.ResponseWriter, r *http.Request) - вывод списка команд
+func HandlerList(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	out_arr_count, err := services.CommGetList(ctx)
@@ -94,8 +95,8 @@ func HandleList(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// func HandleGetOne(w http.ResponseWriter, r *http.Request) - вывод команды по id
-func HandleGetOne(w http.ResponseWriter, r *http.Request) {
+// func HandlerGetOne(w http.ResponseWriter, r *http.Request) - вывод команды по id
+func HandlerGetOne(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	vars := mux.Vars(r)
@@ -120,8 +121,8 @@ func HandleGetOne(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// func HandleResults(w http.ResponseWriter, r *http.Request) - вывод списка результатов
-func HandleResults(w http.ResponseWriter, r *http.Request) {
+// func HandlerResults(w http.ResponseWriter, r *http.Request) - вывод списка результатов
+func HandlerResults(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	out_arr_count, err := services.ResultGetList(ctx)
@@ -141,36 +142,10 @@ func HandleResults(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func HandleTest(w http.ResponseWriter, r *http.Request) {
-	// vars := mux.Vars(r)
-	starr := r.URL.Query().Get("ids")
-	w.Write([]byte(starr))
-	log.Println(starr)
-	arr := strings.Split(starr, ",")
+func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	io.WriteString(w, `{"alive": true}`)
 
-	for _, s := range arr {
-		log.Println(s)
-	}
-
-	// var url, err = url.ParseQuery("a=1&a=2&b=3")
-	// var url, err = url.ParseQuery(r.URL.Query())
-
-	// if err != nil {
-	// 	log.Println("failed to parse:", err)
-	// }
-
-	// w.Write([]byte(" r.URL.Query() "))
-	// w.Write([]byte(r.URL.Query().))
-	// arr := url["a"]
-	// w.Write([]byte(arr[1]))
-	// fmt.Println(url["a"])
-
-	// w.Write([]byte(" vars[id] "))
-	// w.Write([]byte(vars["id"]))
-
-	// w.Write([]byte(" arr: "))
-	// w.Write([]byte(arr))
-
-	// url.Get("id")
 	return
 }

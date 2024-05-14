@@ -2,7 +2,7 @@
 git clone https://github.com/u2lentaru/goshell.git  
 docker-compose up  
   
-Должны бытьустановлены Docker/Docker Desktop и Docker-compose  
+Должны быть установлены Docker/Docker Desktop и Docker-compose  
   
 GET  
 http://localhost:8080/ - список всех команд  

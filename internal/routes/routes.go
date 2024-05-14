@@ -7,12 +7,12 @@ import (
 )
 
 func AddRoutes(r *mux.Router) {
-	r.HandleFunc("/", handlers.HandleList).Methods("GET")
-	r.HandleFunc("/commands", handlers.HandleList).Methods("GET")
-	r.HandleFunc("/commands/{id:[0-9]+}", handlers.HandleGetOne).Methods("GET")
-	r.HandleFunc("/commands", handlers.HandlePostExec).Methods("POST")
-	r.HandleFunc("/cmdrun/{id:[0-9]+}", handlers.HandleExecOne).Methods("GET")
-	r.HandleFunc("/cmdrun", handlers.HandleExec).Methods("GET")
-	r.HandleFunc("/results", handlers.HandleResults).Methods("GET")
-	r.HandleFunc("/test", handlers.HandleTest).Methods("GET")
+	r.HandleFunc("/", handlers.HandlerList).Methods("GET")
+	r.HandleFunc("/commands", handlers.HandlerList).Methods("GET")
+	r.HandleFunc("/commands/{id:[0-9]+}", handlers.HandlerGetOne).Methods("GET")
+	r.HandleFunc("/commands", handlers.HandlerPostExec).Methods("POST")
+	r.HandleFunc("/cmdrun/{id:[0-9]+}", handlers.HandlerExecOne).Methods("GET")
+	r.HandleFunc("/cmdrun", handlers.HandlerExec).Methods("GET")
+	r.HandleFunc("/results", handlers.HandlerResults).Methods("GET")
+	r.HandleFunc("/health-check", handlers.HealthCheckHandler).Methods("GET")
 }
