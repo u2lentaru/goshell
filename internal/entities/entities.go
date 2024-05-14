@@ -7,12 +7,6 @@ type Command struct {
 	ScriptText  string `json:"scripttext"`
 }
 
-// //CommandAdd struct
-// type CommandAdd struct {
-// 	CommandText string `json:"commandtext"`
-// 	ScriptText  string `json:"scriptttext"`
-// }
-
 //Command_count  struct
 type Command_count struct {
 	Values []Command `json:"values"`
