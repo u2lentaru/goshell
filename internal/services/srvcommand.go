@@ -11,7 +11,7 @@ import (
 )
 
 // func CommExec(id int) - выполняет скрипт и сохраняет результат
-func CommExec(id int) {
+func CommExec(id int) error {
 	ctx := context.Background()
 	dbpool := pgclient.WDB
 	g := entities.Command{}
@@ -51,12 +51,13 @@ func CommExec(id int) {
 
 	if err != nil {
 		log.Println("Failed execute command add!")
-		return
+		return err
 	}
 
-	return
+	return nil
 }
 
+// func CommSave(bs []byte) (int, error) - сохраняет скрипт в базу
 func CommSave(bs []byte) (int, error) {
 	ctx := context.Background()
 	dbpool := pgclient.WDB
@@ -82,4 +83,41 @@ func CommSave(bs []byte) (int, error) {
 	}
 
 	return cid, nil
+}
+
+// func CommGetList(ctx context.Context) (entities.Command_count, error)
+func CommGetList(ctx context.Context) (entities.Command_count, error) {
+	dbpool := pgclient.WDB
+	gs := entities.Command{}
+
+	gsc := 0
+	err := dbpool.QueryRow(ctx, "SELECT count(*) from public.commands;").Scan(&gsc)
+
+	if err != nil {
+		log.Println(err.Error(), "commands_count")
+		return entities.Command_count{}, err
+	}
+
+	out_arr := make([]entities.Command, 0, gsc)
+
+	rows, err := dbpool.Query(ctx, "SELECT * from public.commands;")
+	if err != nil {
+		log.Println(err.Error(), "commands_list")
+		return entities.Command_count{}, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		err = rows.Scan(&gs.Id, &gs.CommandText, &gs.ScriptText)
+		if err != nil {
+			log.Println("failed to scan row:", err)
+		}
+
+		out_arr = append(out_arr, gs)
+	}
+
+	out_arr_count := entities.Command_count{Values: out_arr, Count: gsc}
+
+	return out_arr_count, nil
 }

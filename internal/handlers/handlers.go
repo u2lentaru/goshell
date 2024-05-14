@@ -17,11 +17,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func HandleRoot(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello Root!"))
-	return
-}
-
 // func HandlePostExec(w http.ResponseWriter, r *http.Request) - загрузка скрипта и его выполнение
 func HandlePostExec(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
@@ -38,7 +33,10 @@ func HandlePostExec(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	services.CommExec(id)
+	err = services.CommExec(id)
+	if err != nil {
+		log.Println(err.Error(), "CommExec error")
+	}
 
 	http.Redirect(w, r, "/results", http.StatusSeeOther)
 }
@@ -70,42 +68,14 @@ func HandleExec(w http.ResponseWriter, r *http.Request) {
 
 // func HandleList(w http.ResponseWriter, r *http.Request) - вывод списка команд
 func HandleList(w http.ResponseWriter, r *http.Request) {
-	// db
 	ctx := context.Background()
 
-	dbpool := pgclient.WDB
-	gs := entities.Command{}
-
-	gsc := 0
-	err := dbpool.QueryRow(ctx, "SELECT count(*) from public.commands;").Scan(&gsc)
-
+	out_arr_count, err := services.CommGetList(ctx)
 	if err != nil {
-		log.Println(err.Error(), "commands_count")
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
-	out_arr := make([]entities.Command, 0, gsc)
-
-	rows, err := dbpool.Query(ctx, "SELECT * from public.commands;")
-	if err != nil {
-		log.Println(err.Error(), "commands_list")
-		return
-	}
-
-	defer rows.Close()
-
-	for rows.Next() {
-		err = rows.Scan(&gs.Id, &gs.CommandText, &gs.ScriptText)
-		if err != nil {
-			log.Println("failed to scan row:", err)
-		}
-
-		out_arr = append(out_arr, gs)
-	}
-
-	out_arr_count := entities.Command_count{Values: out_arr, Count: gsc}
-
-	// handler
 	out_count, err := json.Marshal(out_arr_count)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
