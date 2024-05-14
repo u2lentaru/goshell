@@ -132,8 +132,7 @@ func HandleExecOne(w http.ResponseWriter, r *http.Request) {
 func HandleExec(w http.ResponseWriter, r *http.Request) {
 	a := []int{1, 2, 3}
 	for _, i := range a {
-
-		services.CommExec(i)
+		go services.CommExec(i)
 	}
 
 	http.Redirect(w, r, "/results", http.StatusSeeOther)
