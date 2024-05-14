@@ -10,8 +10,6 @@ import (
 	"net/url"
 	"strconv"
 
-	"goshell/internal/entities"
-	"goshell/internal/pgclient"
 	"goshell/internal/services"
 
 	"github.com/gorilla/mux"
@@ -115,42 +113,14 @@ func HandleGetOne(w http.ResponseWriter, r *http.Request) {
 
 // func HandleResults(w http.ResponseWriter, r *http.Request) - вывод списка результатов
 func HandleResults(w http.ResponseWriter, r *http.Request) {
-	// db
 	ctx := context.Background()
 
-	dbpool := pgclient.WDB
-	gs := entities.Result{}
-
-	gsc := 0
-	err := dbpool.QueryRow(ctx, "SELECT count(*) from public.results;").Scan(&gsc)
-
+	out_arr_count, err := services.ResultGetList(ctx)
 	if err != nil {
-		log.Println(err.Error(), "results_count")
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
-	out_arr := make([]entities.Result, 0, gsc)
-
-	rows, err := dbpool.Query(ctx, "SELECT id, id_command, output, time::text as ts from public.results;")
-	if err != nil {
-		log.Println(err.Error(), "results_list")
-		return
-	}
-
-	defer rows.Close()
-
-	for rows.Next() {
-		err = rows.Scan(&gs.Id, &gs.IdC, &gs.Output, &gs.TS)
-		if err != nil {
-			log.Println("failed to scan row:", err)
-		}
-
-		out_arr = append(out_arr, gs)
-	}
-
-	out_arr_count := entities.Result_count{Values: out_arr, Count: gsc}
-
-	// handler
 	out_count, err := json.Marshal(out_arr_count)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
