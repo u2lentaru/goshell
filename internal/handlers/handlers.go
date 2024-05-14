@@ -8,10 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
-	"os/exec"
 	"strconv"
-	"time"
 
 	"goshell/internal/entities"
 	"goshell/internal/pgclient"
@@ -27,9 +24,6 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 
 // func HandlePostExec(w http.ResponseWriter, r *http.Request) - загрузка скрипта и его выполнение
 func HandlePostExec(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
-	dbpool := pgclient.WDB
-
 	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 
@@ -38,80 +32,15 @@ func HandlePostExec(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte(" body: "))
-	w.Write(body)
-
-	_ = os.MkdirAll("/test", 0777)
-
-	lsout, err := exec.Command("ls", "/").Output()
-	w.Write([]byte(" ls /: "))
-	w.Write(lsout)
-
-	f, err := os.CreateTemp("/test", "*.sh")
+	id, err := services.CommSave(body)
 	if err != nil {
-		log.Println(err.Error())
-	}
-	defer f.Close()
-
-	fn := f.Name()
-	w.Write([]byte(" f.Name "))
-	w.Write([]byte(fn))
-
-	if err := os.WriteFile(fn, body, 0777); err != nil {
-		log.Println(err.Error())
-	}
-
-	lsout, err = exec.Command("ls", "-l", fn).Output()
-	w.Write([]byte(" ls /test/file.sh: "))
-	w.Write(lsout)
-
-	stout := ""
-	sterr := ""
-	cmd := fn
-
-	out, err := exec.Command("bash", cmd).Output()
-
-	if err != nil {
-		sterr = fmt.Sprintf("Failed to execute command: %s error %s", cmd, err.Error())
-	}
-
-	stout = string(out)
-
-	cid := 0
-	err = dbpool.QueryRow(ctx, "insert into commands (id, command_text, script_text) values (default, $1, $2) returning id;", cmd, string(body)).Scan(&cid)
-
-	if err != nil {
-		// w.Write([]byte("Failed execute command add!"))
-		w.Write([]byte(" dberr: "))
-		w.Write([]byte(err.Error()))
-		w.Write([]byte(" stout: "))
-		w.Write([]byte(stout))
-		w.Write([]byte(" sterr: "))
-		w.Write([]byte(sterr))
+		log.Println(err.Error(), "CommSave error")
 		return
 	}
 
-	rid := 0
-	t := time.Now()
-	err = dbpool.QueryRow(ctx, "insert into results (id, id_command, output, time) values (default, $1, $2, $3) returning id;", cid, stout, t.Format("2006-01-02 15:04:05")).Scan(&rid)
+	services.CommExec(id)
 
-	if err != nil {
-		// w.Write([]byte("Failed execute command add!"))
-		w.Write([]byte(" dberr: "))
-		w.Write([]byte(err.Error()))
-		w.Write([]byte(" stout: "))
-		w.Write([]byte(stout))
-		w.Write([]byte(" sterr: "))
-		w.Write([]byte(sterr))
-		return
-	}
-
-	w.Write([]byte(" stout: "))
-	w.Write([]byte(stout))
-	w.Write([]byte(" sterr: "))
-	w.Write([]byte(sterr))
-
-	return
+	http.Redirect(w, r, "/results", http.StatusSeeOther)
 }
 
 // func HandleExecOne(w http.ResponseWriter, r *http.Request) - выполнение скрипта по id
@@ -131,12 +60,12 @@ func HandleExecOne(w http.ResponseWriter, r *http.Request) {
 // func HandleExec(w http.ResponseWriter, r *http.Request) - выполнение списка скриптов
 func HandleExec(w http.ResponseWriter, r *http.Request) {
 	a := []int{1, 2, 3}
+
 	for _, i := range a {
 		go services.CommExec(i)
 	}
 
 	http.Redirect(w, r, "/results", http.StatusSeeOther)
-	return
 }
 
 // func HandleList(w http.ResponseWriter, r *http.Request) - вывод списка команд

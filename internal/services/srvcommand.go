@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// func CommExec(id int) - выполняет скрипт и сохраняет результат
 func CommExec(id int) {
 	ctx := context.Background()
 	dbpool := pgclient.WDB
@@ -54,4 +55,31 @@ func CommExec(id int) {
 	}
 
 	return
+}
+
+func CommSave(bs []byte) (int, error) {
+	ctx := context.Background()
+	dbpool := pgclient.WDB
+
+	_ = os.MkdirAll("/test", 0777)
+
+	f, err := os.CreateTemp("/test", "*.sh")
+	if err != nil {
+		log.Println(err.Error())
+	}
+	defer f.Close()
+
+	if err := os.WriteFile(f.Name(), bs, 0777); err != nil {
+		log.Println(err.Error())
+	}
+
+	cid := 0
+	err = dbpool.QueryRow(ctx, "insert into commands (id, command_text, script_text) values (default, $1, $2) returning id;", f.Name(), string(bs)).Scan(&cid)
+
+	if err != nil {
+		log.Println(err.Error())
+		return 0, err
+	}
+
+	return cid, nil
 }
