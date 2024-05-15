@@ -15,7 +15,7 @@ type CommandStorage struct {
 	dbpool *pgxpool.Pool
 }
 
-//func NewCommandStorage(db *pgxpool.Pool) *CommandStorage
+//func NewCommandStorage() *CommandStorage
 func NewCommandStorage() *CommandStorage {
 	return &CommandStorage{dbpool: pgclient.WDB}
 }

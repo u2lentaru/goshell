@@ -11,7 +11,19 @@ import (
 	"time"
 )
 
+//type CommandService struct
+type CommandService struct {
+}
+
+//func NewCommandService() *CommandService
+func NewCommandService() *CommandService {
+	return &CommandService{}
+}
+
 type ifCommandStorage interface {
+	// CommExec(id int) error
+	// CommSave(bs []byte) (int, error)
+	// GetList(ctx context.Context) (entities.Command_count, error)
 	GetOne(ctx context.Context, i int) (entities.Command_count, error)
 }
 
@@ -128,7 +140,7 @@ func CommGetList(ctx context.Context) (entities.Command_count, error) {
 }
 
 // func CommGetOne(ctx context.Context, id int) (entities.Command_count, error) - вывод команды по id
-func CommGetOne(ctx context.Context, id int) (entities.Command_count, error) {
+func (esv *CommandService) GetOne(ctx context.Context, id int) (entities.Command_count, error) {
 	var est ifCommandStorage
 	est = pgsql.NewCommandStorage()
 

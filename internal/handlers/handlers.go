@@ -10,10 +10,18 @@ import (
 	"strconv"
 	"strings"
 
+	"goshell/internal/entities"
 	"goshell/internal/services"
 
 	"github.com/gorilla/mux"
 )
+
+type ifCommandService interface {
+	// CommExec(id int) error
+	// CommSave(bs []byte) (int, error)
+	// GetList(ctx context.Context) (entities.Command_count, error)
+	GetOne(ctx context.Context, i int) (entities.Command_count, error)
+}
 
 // func HandlerPostExec(w http.ResponseWriter, r *http.Request) - загрузка скрипта и его выполнение
 func HandlerPostExec(w http.ResponseWriter, r *http.Request) {
@@ -97,6 +105,8 @@ func HandlerList(w http.ResponseWriter, r *http.Request) {
 
 // func HandlerGetOne(w http.ResponseWriter, r *http.Request) - вывод команды по id
 func HandlerGetOne(w http.ResponseWriter, r *http.Request) {
+	var esv ifCommandService
+	esv = services.NewCommandService()
 	ctx := context.Background()
 
 	vars := mux.Vars(r)
@@ -105,7 +115,7 @@ func HandlerGetOne(w http.ResponseWriter, r *http.Request) {
 		i = 0
 	}
 
-	out_arr_count, err := services.CommGetOne(ctx, i)
+	out_arr_count, err := esv.GetOne(ctx, i)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
