@@ -71,7 +71,7 @@ func HandlerExec(w http.ResponseWriter, r *http.Request) {
 		go services.CommExec(id)
 	}
 
-	http.Redirect(w, r, "/results", http.StatusSeeOther)
+	http.Redirect(w, r, "/commands", http.StatusSeeOther)
 }
 
 // func HandlerList(w http.ResponseWriter, r *http.Request) - вывод списка команд
