@@ -17,10 +17,15 @@ import (
 )
 
 type ifCommandService interface {
-	// CommExec(id int) error
-	// CommSave(bs []byte) (int, error)
+	// PostExec(bs []byte, id int) error
+	// ExecOne(id int) error
+	// Exec(ids []int) error
 	// GetList(ctx context.Context) (entities.Command_count, error)
 	GetOne(ctx context.Context, i int) (entities.Command_count, error)
+}
+
+type ifResultService interface {
+	// GetList(ctx context.Context) (entities.Result_count, error)
 }
 
 // func HandlerPostExec(w http.ResponseWriter, r *http.Request) - загрузка скрипта и его выполнение
