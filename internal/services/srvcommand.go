@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"goshell/internal/adapters/db/pgsql"
 	"goshell/internal/entities"
 	"goshell/internal/pgclient"
 	"log"
@@ -9,6 +10,10 @@ import (
 	"os/exec"
 	"time"
 )
+
+type ifCommandStorage interface {
+	GetOne(ctx context.Context, i int) (entities.Command_count, error)
+}
 
 // func CommExec(id int) - выполняет скрипт и сохраняет результат
 func CommExec(id int) error {
@@ -124,20 +129,14 @@ func CommGetList(ctx context.Context) (entities.Command_count, error) {
 
 // func CommGetOne(ctx context.Context, id int) (entities.Command_count, error) - вывод команды по id
 func CommGetOne(ctx context.Context, id int) (entities.Command_count, error) {
-	dbpool := pgclient.WDB
-	out_arr := []entities.Command{}
-	g := entities.Command{}
+	var est ifCommandStorage
+	est = pgsql.NewCommandStorage()
 
-	err := dbpool.QueryRow(ctx, "SELECT * from public.commands where id=$1;", id).Scan(&g.Id, &g.CommandText, &g.ScriptText)
-
+	out_arr_count, err := est.GetOne(ctx, id)
 	if err != nil {
 		log.Println(err.Error(), "commands_one")
 		return entities.Command_count{Values: []entities.Command{}, Count: 0}, err
 	}
-
-	out_arr = append(out_arr, g)
-
-	out_arr_count := entities.Command_count{Values: out_arr, Count: 1}
 
 	return out_arr_count, nil
 }
