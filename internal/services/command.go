@@ -4,11 +4,7 @@ import (
 	"context"
 	"goshell/internal/adapters/db/pgsql"
 	"goshell/internal/entities"
-	"goshell/internal/pgclient"
 	"log"
-	"os"
-	"os/exec"
-	"time"
 )
 
 //type CommandService struct
@@ -21,50 +17,53 @@ func NewCommandService() *CommandService {
 }
 
 type ifCommandStorage interface {
-	// CommExec(id int) error
+	CommExec(ctx context.Context, id int) error
 	CommSave(ctx context.Context, bs []byte) (int, error)
 	GetList(ctx context.Context) (entities.Command_count, error)
 	GetOne(ctx context.Context, i int) (entities.Command_count, error)
 }
 
-// func CommExec(id int) - выполняет скрипт и сохраняет результат
-func CommExec(id int) error {
-	ctx := context.Background()
-	dbpool := pgclient.WDB
-	g := entities.Command{}
+// func CommExec(ctx context.Context, id int) - выполняет скрипт и сохраняет результат
+func CommExec(ctx context.Context, id int) error {
+	// dbpool := pgclient.WDB
+	// g := entities.Command{}
 
-	err := dbpool.QueryRow(ctx, "SELECT * from public.commands where id=$1;", id).Scan(&g.Id, &g.CommandText, &g.ScriptText)
+	// err := dbpool.QueryRow(ctx, "SELECT * from public.commands where id=$1;", id).Scan(&g.Id, &g.CommandText, &g.ScriptText)
 
-	if err != nil {
-		log.Println(err.Error(), "exec_one")
-	}
+	// if err != nil {
+	// 	log.Println(err.Error(), "exec_one")
+	// }
 
-	_ = os.MkdirAll("/test", 0777)
+	// _ = os.MkdirAll("/test", 0777)
 
-	f, err := os.CreateTemp("/test", "*.sh")
-	if err != nil {
-		log.Println(err.Error())
-	}
-	defer f.Close()
+	// f, err := os.CreateTemp("/test", "*.sh")
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// }
+	// defer f.Close()
 
-	if err := os.WriteFile(f.Name(), []byte(g.ScriptText), 0777); err != nil {
-		log.Println(err.Error())
-	}
+	// if err := os.WriteFile(f.Name(), []byte(g.ScriptText), 0777); err != nil {
+	// 	log.Println(err.Error())
+	// }
 
-	stout := ""
-	cmd := f.Name()
+	// stout := ""
+	// cmd := f.Name()
 
-	out, err := exec.Command("bash", cmd).Output()
+	// out, err := exec.Command("bash", cmd).Output()
 
-	if err != nil {
-		log.Println(err.Error())
-	}
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// }
 
-	stout = string(out)
+	// stout = string(out)
 
-	rid := 0
-	t := time.Now()
-	err = dbpool.QueryRow(ctx, "insert into results (id, id_command, output, time) values (default, $1, $2, $3) returning id;", g.Id, stout, t.Format("2006-01-02 15:04:05")).Scan(&rid)
+	// rid := 0
+	// t := time.Now()
+	// err = dbpool.QueryRow(ctx, "insert into results (id, id_command, output, time) values (default, $1, $2, $3) returning id;", g.Id, stout, t.Format("2006-01-02 15:04:05")).Scan(&rid)
+	var est ifCommandStorage
+	est = pgsql.NewCommandStorage()
+
+	err := est.CommExec(ctx, id)
 
 	if err != nil {
 		log.Println("Failed execute command add!")

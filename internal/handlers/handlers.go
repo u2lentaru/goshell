@@ -30,8 +30,8 @@ type ifResultService interface {
 
 // func HandlerPostExec(w http.ResponseWriter, r *http.Request) - загрузка скрипта и его выполнение
 func HandlerPostExec(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
 	ctx := context.Background()
+	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 
 	if err != nil {
@@ -45,7 +45,7 @@ func HandlerPostExec(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = services.CommExec(id)
+	err = services.CommExec(ctx, id)
 	if err != nil {
 		log.Println(err.Error(), "CommExec error")
 	}
@@ -55,6 +55,7 @@ func HandlerPostExec(w http.ResponseWriter, r *http.Request) {
 
 // func HandlerExecOne(w http.ResponseWriter, r *http.Request) - выполнение скрипта по id
 func HandlerExecOne(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
 	vars := mux.Vars(r)
 
 	i, err := strconv.Atoi(vars["id"])
@@ -62,13 +63,14 @@ func HandlerExecOne(w http.ResponseWriter, r *http.Request) {
 		i = 0
 	}
 
-	services.CommExec(i)
+	services.CommExec(ctx, i)
 
 	http.Redirect(w, r, "/results", http.StatusSeeOther)
 }
 
 // func HandlerExec(w http.ResponseWriter, r *http.Request) - выполнение списка скриптов
 func HandlerExec(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
 	starr := r.URL.Query().Get("ids")
 	arr := strings.Split(starr, ",")
 
@@ -82,7 +84,7 @@ func HandlerExec(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, id := range ids {
-		go services.CommExec(id)
+		go services.CommExec(ctx, id)
 	}
 
 	http.Redirect(w, r, "/commands", http.StatusSeeOther)
