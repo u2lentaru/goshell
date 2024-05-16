@@ -53,6 +53,32 @@ func CommSave(ctx context.Context, bs []byte) (int, error) {
 }
 
 // func CommGetList(ctx context.Context) (entities.Command_count, error) - возвращает список команд
+func (esv *CommandService) ExecOne(ctx context.Context, id int) error {
+	var est ifCommandStorage
+	est = pgsql.NewCommandStorage()
+
+	err := est.CommExec(ctx, id)
+	if err != nil {
+		log.Println(err.Error(), "commands_list")
+		return err
+	}
+
+	return nil
+}
+
+// func CommGetList(ctx context.Context) (entities.Command_count, error) - возвращает список команд
+func (esv *CommandService) Exec(ctx context.Context, ids []int) error {
+	var est ifCommandStorage
+	est = pgsql.NewCommandStorage()
+
+	for _, id := range ids {
+		go est.CommExec(ctx, id)
+	}
+
+	return nil
+}
+
+// func CommGetList(ctx context.Context) (entities.Command_count, error) - возвращает список команд
 func (esv *CommandService) GetList(ctx context.Context) (entities.Command_count, error) {
 	var est ifCommandStorage
 	est = pgsql.NewCommandStorage()

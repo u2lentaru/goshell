@@ -17,9 +17,9 @@ import (
 )
 
 type ifCommandService interface {
-	// PostExec(bs []byte, id int) error
-	// ExecOne(id int) error
-	// Exec(ids []int) error
+	// PostExec(ctx context.Context, bs []byte, id int) error
+	ExecOne(ctx context.Context, id int) error
+	Exec(ctx context.Context, ids []int) error
 	GetList(ctx context.Context) (entities.Command_count, error)
 	GetOne(ctx context.Context, i int) (entities.Command_count, error)
 }
@@ -55,6 +55,8 @@ func HandlerPostExec(w http.ResponseWriter, r *http.Request) {
 
 // func HandlerExecOne(w http.ResponseWriter, r *http.Request) - выполнение скрипта по id
 func HandlerExecOne(w http.ResponseWriter, r *http.Request) {
+	var esv ifCommandService
+	esv = services.NewCommandService()
 	ctx := context.Background()
 	vars := mux.Vars(r)
 
@@ -63,13 +65,19 @@ func HandlerExecOne(w http.ResponseWriter, r *http.Request) {
 		i = 0
 	}
 
-	services.CommExec(ctx, i)
+	esv.ExecOne(ctx, i)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
 
 	http.Redirect(w, r, "/results", http.StatusSeeOther)
 }
 
 // func HandlerExec(w http.ResponseWriter, r *http.Request) - выполнение списка скриптов
 func HandlerExec(w http.ResponseWriter, r *http.Request) {
+	var esv ifCommandService
+	esv = services.NewCommandService()
 	ctx := context.Background()
 	starr := r.URL.Query().Get("ids")
 	arr := strings.Split(starr, ",")
@@ -83,8 +91,10 @@ func HandlerExec(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	for _, id := range ids {
-		go services.CommExec(ctx, id)
+	err := esv.Exec(ctx, ids)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
 	}
 
 	http.Redirect(w, r, "/commands", http.StatusSeeOther)
