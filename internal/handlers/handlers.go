@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -17,7 +16,7 @@ import (
 )
 
 type ifCommandService interface {
-	// PostExec(ctx context.Context, bs []byte, id int) error
+	PostExec(ctx context.Context, bs []byte) error
 	ExecOne(ctx context.Context, id int) error
 	Exec(ctx context.Context, ids []int) error
 	GetList(ctx context.Context) (entities.Command_count, error)
@@ -30,6 +29,8 @@ type ifResultService interface {
 
 // func HandlerPostExec(w http.ResponseWriter, r *http.Request) - загрузка скрипта и его выполнение
 func HandlerPostExec(w http.ResponseWriter, r *http.Request) {
+	var esv ifCommandService
+	esv = services.NewCommandService()
 	ctx := context.Background()
 	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
@@ -39,15 +40,10 @@ func HandlerPostExec(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := services.CommSave(ctx, body)
+	err = esv.PostExec(ctx, body)
 	if err != nil {
-		log.Println(err.Error(), "CommSave error")
+		http.Error(w, err.Error(), 500)
 		return
-	}
-
-	err = services.CommExec(ctx, id)
-	if err != nil {
-		log.Println(err.Error(), "CommExec error")
 	}
 
 	http.Redirect(w, r, "/results", http.StatusSeeOther)

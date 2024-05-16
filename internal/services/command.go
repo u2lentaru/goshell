@@ -23,33 +23,23 @@ type ifCommandStorage interface {
 	GetOne(ctx context.Context, i int) (entities.Command_count, error)
 }
 
-// func CommExec(ctx context.Context, id int) - выполняет скрипт и сохраняет результат
-func CommExec(ctx context.Context, id int) error {
+func (esv *CommandService) PostExec(ctx context.Context, bs []byte) error {
 	var est ifCommandStorage
 	est = pgsql.NewCommandStorage()
 
-	err := est.CommExec(ctx, id)
-
+	id, err := est.CommSave(ctx, bs)
 	if err != nil {
-		log.Println("Failed execute command add!")
+		log.Println(err.Error(), "CommSave error")
+		return err
+	}
+
+	err = est.CommExec(ctx, id)
+	if err != nil {
+		log.Println(err.Error(), "CommExec error")
 		return err
 	}
 
 	return nil
-}
-
-// func CommSave(ctx context.Context, bs []byte) (int, error) - сохраняет скрипт в базу
-func CommSave(ctx context.Context, bs []byte) (int, error) {
-	var est ifCommandStorage
-	est = pgsql.NewCommandStorage()
-
-	cid, err := est.CommSave(ctx, bs)
-	if err != nil {
-		log.Println(err.Error(), "commands_list")
-		return 0, err
-	}
-
-	return cid, nil
 }
 
 // func CommGetList(ctx context.Context) (entities.Command_count, error) - возвращает список команд
