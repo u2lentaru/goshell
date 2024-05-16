@@ -77,3 +77,5 @@ func GetDb(ctx context.Context, url string) (*pgxpool.Pool, error) {
 
 	return WDB, nil
 }
+
+//$ENV:DB_HOST="localhost"

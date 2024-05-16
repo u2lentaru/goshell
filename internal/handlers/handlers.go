@@ -24,7 +24,7 @@ type ifCommandService interface {
 }
 
 type ifResultService interface {
-	// GetList(ctx context.Context) (entities.Result_count, error)
+	GetList(ctx context.Context) (entities.Result_count, error)
 }
 
 // func HandlerPostExec(w http.ResponseWriter, r *http.Request) - загрузка скрипта и его выполнение
@@ -149,9 +149,11 @@ func HandlerGetOne(w http.ResponseWriter, r *http.Request) {
 
 // func HandlerResults(w http.ResponseWriter, r *http.Request) - вывод списка результатов
 func HandlerResults(w http.ResponseWriter, r *http.Request) {
+	var esv ifResultService
+	esv = services.NewResultService()
 	ctx := context.Background()
 
-	out_arr_count, err := services.ResultGetList(ctx)
+	out_arr_count, err := esv.GetList(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return

@@ -49,7 +49,7 @@ func (esv *CommandService) ExecOne(ctx context.Context, id int) error {
 
 	err := est.CommExec(ctx, id)
 	if err != nil {
-		log.Println(err.Error(), "commands_list")
+		log.Println(err.Error(), "CommExec")
 		return err
 	}
 

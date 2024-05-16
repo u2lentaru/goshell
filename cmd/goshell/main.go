@@ -17,8 +17,6 @@ import (
 
 func main() {
 	// TODO: config
-	//$ENV:DB_HOST="localhost"
-
 	// TODO: logs
 
 	url := "postgres://postgres:postgres@" + os.Getenv("DB_HOST") + ":5432/postgres"

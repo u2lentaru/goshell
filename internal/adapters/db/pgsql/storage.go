@@ -23,6 +23,16 @@ func NewCommandStorage() *CommandStorage {
 	return &CommandStorage{dbpool: pgclient.WDB}
 }
 
+// type ResultStorage struct
+type ResultStorage struct {
+	dbpool *pgxpool.Pool
+}
+
+// func NewResultStorage() *ResultStorage
+func NewResultStorage() *ResultStorage {
+	return &ResultStorage{dbpool: pgclient.WDB}
+}
+
 // func (est *CommandStorage) CommExec(ctx context.Context, id int) error
 func (est *CommandStorage) CommExec(ctx context.Context, id int) error {
 	g := entities.Command{}
@@ -145,4 +155,40 @@ func (est *CommandStorage) GetOne(ctx context.Context, id int) (entities.Command
 
 	out_count := entities.Command_count{Values: out_arr, Count: 1}
 	return out_count, nil
+}
+
+// func (est *ResultStorage) GetList(ctx context.Context) (entities.Result_count, error)
+func (est *ResultStorage) GetList(ctx context.Context) (entities.Result_count, error) {
+	gs := entities.Result{}
+
+	gsc := 0
+	err := est.dbpool.QueryRow(ctx, "SELECT count(*) from public.results;").Scan(&gsc)
+
+	if err != nil {
+		log.Println(err.Error(), "results_count")
+		return entities.Result_count{Values: []entities.Result{}, Count: 0}, err
+	}
+
+	out_arr := make([]entities.Result, 0, gsc)
+
+	rows, err := est.dbpool.Query(ctx, "SELECT id, id_command, output, time::text as ts from public.results;")
+	if err != nil {
+		log.Println(err.Error(), "results_list")
+		return entities.Result_count{Values: []entities.Result{}, Count: 0}, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		err = rows.Scan(&gs.Id, &gs.IdC, &gs.Output, &gs.TS)
+		if err != nil {
+			log.Println("failed to scan row:", err)
+		}
+
+		out_arr = append(out_arr, gs)
+	}
+
+	out_arr_count := entities.Result_count{Values: out_arr, Count: gsc}
+
+	return out_arr_count, nil
 }
