@@ -23,7 +23,7 @@ func NewCommandService() *CommandService {
 type ifCommandStorage interface {
 	// CommExec(id int) error
 	// CommSave(bs []byte) (int, error)
-	// GetList(ctx context.Context) (entities.Command_count, error)
+	GetList(ctx context.Context) (entities.Command_count, error)
 	GetOne(ctx context.Context, i int) (entities.Command_count, error)
 }
 
@@ -104,37 +104,14 @@ func CommSave(bs []byte) (int, error) {
 
 // func CommGetList(ctx context.Context) (entities.Command_count, error) - возвращает список команд
 func CommGetList(ctx context.Context) (entities.Command_count, error) {
-	dbpool := pgclient.WDB
-	gs := entities.Command{}
+	var est ifCommandStorage
+	est = pgsql.NewCommandStorage()
 
-	gsc := 0
-	err := dbpool.QueryRow(ctx, "SELECT count(*) from public.commands;").Scan(&gsc)
-
-	if err != nil {
-		log.Println(err.Error(), "commands_count")
-		return entities.Command_count{Values: []entities.Command{}, Count: 0}, err
-	}
-
-	out_arr := make([]entities.Command, 0, gsc)
-
-	rows, err := dbpool.Query(ctx, "SELECT * from public.commands;")
+	out_arr_count, err := est.GetList(ctx)
 	if err != nil {
 		log.Println(err.Error(), "commands_list")
 		return entities.Command_count{Values: []entities.Command{}, Count: 0}, err
 	}
-
-	defer rows.Close()
-
-	for rows.Next() {
-		err = rows.Scan(&gs.Id, &gs.CommandText, &gs.ScriptText)
-		if err != nil {
-			log.Println("failed to scan row:", err)
-		}
-
-		out_arr = append(out_arr, gs)
-	}
-
-	out_arr_count := entities.Command_count{Values: out_arr, Count: gsc}
 
 	return out_arr_count, nil
 }
