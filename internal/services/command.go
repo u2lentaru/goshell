@@ -22,7 +22,7 @@ func NewCommandService() *CommandService {
 
 type ifCommandStorage interface {
 	// CommExec(id int) error
-	// CommSave(bs []byte) (int, error)
+	CommSave(ctx context.Context, bs []byte) (int, error)
 	GetList(ctx context.Context) (entities.Command_count, error)
 	GetOne(ctx context.Context, i int) (entities.Command_count, error)
 }
@@ -74,28 +74,14 @@ func CommExec(id int) error {
 	return nil
 }
 
-// func CommSave(bs []byte) (int, error) - сохраняет скрипт в базу
-func CommSave(bs []byte) (int, error) {
-	ctx := context.Background()
-	dbpool := pgclient.WDB
+// func CommSave(ctx context.Context, bs []byte) (int, error) - сохраняет скрипт в базу
+func CommSave(ctx context.Context, bs []byte) (int, error) {
+	var est ifCommandStorage
+	est = pgsql.NewCommandStorage()
 
-	_ = os.MkdirAll("/test", 0777)
-
-	f, err := os.CreateTemp("/test", "*.sh")
+	cid, err := est.CommSave(ctx, bs)
 	if err != nil {
-		log.Println(err.Error())
-	}
-	defer f.Close()
-
-	if err := os.WriteFile(f.Name(), bs, 0777); err != nil {
-		log.Println(err.Error())
-	}
-
-	cid := 0
-	err = dbpool.QueryRow(ctx, "insert into commands (id, command_text, script_text) values (default, $1, $2) returning id;", f.Name(), string(bs)).Scan(&cid)
-
-	if err != nil {
-		log.Println(err.Error())
+		log.Println(err.Error(), "commands_list")
 		return 0, err
 	}
 

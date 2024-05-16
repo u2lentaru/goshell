@@ -5,6 +5,7 @@ import (
 	"goshell/internal/entities"
 	"goshell/internal/pgclient"
 	"log"
+	"os"
 
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -18,6 +19,31 @@ type CommandStorage struct {
 //func NewCommandStorage() *CommandStorage
 func NewCommandStorage() *CommandStorage {
 	return &CommandStorage{dbpool: pgclient.WDB}
+}
+
+// func (est *CommandStorage) CommSave(ctx context.Context, bs []byte) (int, error)
+func (est *CommandStorage) CommSave(ctx context.Context, bs []byte) (int, error) {
+	_ = os.MkdirAll("/test", 0777)
+
+	f, err := os.CreateTemp("/test", "*.sh")
+	if err != nil {
+		log.Println(err.Error())
+	}
+	defer f.Close()
+
+	if err := os.WriteFile(f.Name(), bs, 0777); err != nil {
+		log.Println(err.Error())
+	}
+
+	cid := 0
+	err = est.dbpool.QueryRow(ctx, "insert into commands (id, command_text, script_text) values (default, $1, $2) returning id;", f.Name(), string(bs)).Scan(&cid)
+
+	if err != nil {
+		log.Println(err.Error())
+		return 0, err
+	}
+
+	return cid, nil
 }
 
 // func (est *CommandStorage) GetList(ctx context.Context) (entities.Command_count, error)

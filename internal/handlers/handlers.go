@@ -31,6 +31,7 @@ type ifResultService interface {
 // func HandlerPostExec(w http.ResponseWriter, r *http.Request) - загрузка скрипта и его выполнение
 func HandlerPostExec(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
+	ctx := context.Background()
 	defer r.Body.Close()
 
 	if err != nil {
@@ -38,7 +39,7 @@ func HandlerPostExec(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := services.CommSave(body)
+	id, err := services.CommSave(ctx, body)
 	if err != nil {
 		log.Println(err.Error(), "CommSave error")
 		return
