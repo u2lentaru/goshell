@@ -53,7 +53,7 @@ func CommSave(ctx context.Context, bs []byte) (int, error) {
 }
 
 // func CommGetList(ctx context.Context) (entities.Command_count, error) - возвращает список команд
-func CommGetList(ctx context.Context) (entities.Command_count, error) {
+func (esv *CommandService) GetList(ctx context.Context) (entities.Command_count, error) {
 	var est ifCommandStorage
 	est = pgsql.NewCommandStorage()
 

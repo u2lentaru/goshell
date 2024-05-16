@@ -20,7 +20,7 @@ type ifCommandService interface {
 	// PostExec(bs []byte, id int) error
 	// ExecOne(id int) error
 	// Exec(ids []int) error
-	// GetList(ctx context.Context) (entities.Command_count, error)
+	GetList(ctx context.Context) (entities.Command_count, error)
 	GetOne(ctx context.Context, i int) (entities.Command_count, error)
 }
 
@@ -92,9 +92,11 @@ func HandlerExec(w http.ResponseWriter, r *http.Request) {
 
 // func HandlerList(w http.ResponseWriter, r *http.Request) - вывод списка команд
 func HandlerList(w http.ResponseWriter, r *http.Request) {
+	var esv ifCommandService
+	esv = services.NewCommandService()
 	ctx := context.Background()
 
-	out_arr_count, err := services.CommGetList(ctx)
+	out_arr_count, err := esv.GetList(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
