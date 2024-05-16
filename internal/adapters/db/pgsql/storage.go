@@ -23,6 +23,7 @@ func NewCommandStorage() *CommandStorage {
 	return &CommandStorage{dbpool: pgclient.WDB}
 }
 
+// func (est *CommandStorage) CommExec(ctx context.Context, id int) error
 func (est *CommandStorage) CommExec(ctx context.Context, id int) error {
 	g := entities.Command{}
 
