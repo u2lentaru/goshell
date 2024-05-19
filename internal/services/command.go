@@ -16,6 +16,7 @@ func NewCommandService() *CommandService {
 	return &CommandService{}
 }
 
+// type ifCommandStorage interface
 type ifCommandStorage interface {
 	CommExec(ctx context.Context, id int) error
 	CommSave(ctx context.Context, bs []byte) (int, error)
@@ -23,6 +24,7 @@ type ifCommandStorage interface {
 	GetOne(ctx context.Context, i int) (entities.Command_count, error)
 }
 
+// func (esv *CommandService) PostExec(ctx context.Context, bs []byte)
 func (esv *CommandService) PostExec(ctx context.Context, bs []byte) error {
 	var est ifCommandStorage
 	est = pgsql.NewCommandStorage()
@@ -42,7 +44,7 @@ func (esv *CommandService) PostExec(ctx context.Context, bs []byte) error {
 	return nil
 }
 
-// func CommGetList(ctx context.Context) (entities.Command_count, error) - возвращает список команд
+// func (esv *CommandService) ExecOne(ctx context.Context, id int) error - возвращает список команд
 func (esv *CommandService) ExecOne(ctx context.Context, id int) error {
 	var est ifCommandStorage
 	est = pgsql.NewCommandStorage()
@@ -56,7 +58,7 @@ func (esv *CommandService) ExecOne(ctx context.Context, id int) error {
 	return nil
 }
 
-// func CommGetList(ctx context.Context) (entities.Command_count, error) - возвращает список команд
+// func (esv *CommandService) Exec(ctx context.Context, ids []int) error - возвращает список команд
 func (esv *CommandService) Exec(ctx context.Context, ids []int) error {
 	var est ifCommandStorage
 	est = pgsql.NewCommandStorage()
@@ -68,7 +70,7 @@ func (esv *CommandService) Exec(ctx context.Context, ids []int) error {
 	return nil
 }
 
-// func CommGetList(ctx context.Context) (entities.Command_count, error) - возвращает список команд
+// func (esv *CommandService) GetList(ctx context.Context) (entities.Command_count, error) - возвращает список команд
 func (esv *CommandService) GetList(ctx context.Context) (entities.Command_count, error) {
 	var est ifCommandStorage
 	est = pgsql.NewCommandStorage()
@@ -82,7 +84,7 @@ func (esv *CommandService) GetList(ctx context.Context) (entities.Command_count,
 	return out_arr_count, nil
 }
 
-// func CommGetOne(ctx context.Context, id int) (entities.Command_count, error) - вывод команды по id
+// func (esv *CommandService) GetOne(ctx context.Context, id int) (entities.Command_count, error) - вывод команды по id
 func (esv *CommandService) GetOne(ctx context.Context, id int) (entities.Command_count, error) {
 	var est ifCommandStorage
 	est = pgsql.NewCommandStorage()

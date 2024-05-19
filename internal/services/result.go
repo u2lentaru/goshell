@@ -16,10 +16,12 @@ func NewResultService() *ResultService {
 	return &ResultService{}
 }
 
+// type ifResultStorage interface
 type ifResultStorage interface {
 	GetList(ctx context.Context) (entities.Result_count, error)
 }
 
+// func (esv *ResultService) GetList(ctx context.Context) (entities.Result_count, error)
 func (esv *ResultService) GetList(ctx context.Context) (entities.Result_count, error) {
 	var est ifResultStorage
 	est = pgsql.NewResultStorage()

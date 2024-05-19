@@ -15,6 +15,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// type ifCommandService interface
 type ifCommandService interface {
 	PostExec(ctx context.Context, bs []byte) error
 	ExecOne(ctx context.Context, id int) error
@@ -23,6 +24,7 @@ type ifCommandService interface {
 	GetOne(ctx context.Context, i int) (entities.Command_count, error)
 }
 
+// type ifResultService interface
 type ifResultService interface {
 	GetList(ctx context.Context) (entities.Result_count, error)
 }
